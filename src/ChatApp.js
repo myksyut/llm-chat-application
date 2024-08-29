@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, PlusCircle, Database, Mail } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+
 const ChatOption = ({ icon, text, onClick }) => (
   <div onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
     {icon}
@@ -19,12 +20,14 @@ const ChatOptions = ({ onOptionClick }) => (
 );
 
 const Message = ({ text, sender }) => (
-  <div className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-    <div className={`max-w-xs md:max-w-md p-2 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
+  <div className="flex justify-center mb-4">
+    <div className={`max-w-2xl w-full p-4 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
       {sender === 'bot' ? (
-        <ReactMarkdown>{text}</ReactMarkdown>
+        <ReactMarkdown>
+          {text}
+        </ReactMarkdown>
       ) : (
-        text
+        <p>{text}</p>
       )}
     </div>
   </div>
@@ -49,13 +52,13 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
           handleSendMessage(inputMessage);
         }
       }}
-      placeholder="メッセージを送信する"
-      className="flex-1 p-2 bg-transparent outline-none"
+      placeholder="ChatGPT にメッセージを送信する"
+      className="flex-1 p-4 bg-transparent outline-none text-white"
       disabled={isLoading}
     />
     <button 
       onClick={() => handleSendMessage(inputMessage)} 
-      className="p-2 text-gray-400 hover:text-white"
+      className="p-4 text-gray-400 hover:text-white"
       disabled={isLoading}
     >
       <Send size={20} />
@@ -117,7 +120,10 @@ const ChatApp = () => {
         // eslint-disable-next-line no-loop-func
         setMessages(prev => {
           const newMessages = [...prev];
-          newMessages[newMessages.length - 1] = { text: botResponse, sender: 'bot' };
+          newMessages[newMessages.length - 1] = {
+            text: botResponse.replace(/\n/g, '  \n'), // Markdown対応の改行
+            sender: 'bot'
+          };
           return newMessages;
         });
       }
