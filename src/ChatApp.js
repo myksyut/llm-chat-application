@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, PlusCircle, Database, Mail } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
-// ChatOption Component
 const ChatOption = ({ icon, text, onClick }) => (
   <div onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
     {icon}
@@ -9,31 +9,35 @@ const ChatOption = ({ icon, text, onClick }) => (
   </div>
 );
 
-// Header Component
-const Header = ({ onReset }) => (
-  <header className="flex items-center justify-between p-4 bg-gray-800">
-    <div className="flex items-center cursor-pointer" onClick={onReset}>
-      <MessageCircle className="mr-2" />
-      <span>ChatGPT</span>
-    </div>
-  </header>
-);
-
-// ChatMessages Component
-const ChatMessages = ({ messages, messagesEndRef }) => (
-  <div className="space-y-4">
-    {messages.map((message, index) => (
-      <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-xs md:max-w-md p-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
-          {message.text}
-        </div>
-      </div>
-    ))}
-    <div ref={messagesEndRef} />
+const ChatOptions = ({ onOptionClick }) => (
+  <div className="grid grid-cols-2 gap-4 mb-8">
+    <ChatOption icon={<PlusCircle size={24} />} text="プレゼンテーションの骨子を作成する" onClick={() => onOptionClick("プレゼンテーションの骨子を作成してください")} />
+    <ChatOption icon={<Database size={24} />} text="製品を比較するキュレーション広告" onClick={() => onOptionClick("製品を比較するキュレーション広告を作成してください")} />
+    <ChatOption icon={<MessageCircle size={24} />} text="キッチンにある材料で野菜多めのレシピ" onClick={() => onOptionClick("キッチンにある材料で野菜多めのレシピを提案してください")} />
+    <ChatOption icon={<Mail size={24} />} text="日常のメールを素敵にするPythonスクリプト" onClick={() => onOptionClick("日常のメールを素敵にするPythonスクリプトを作成してください")} />
   </div>
 );
 
-// ChatInput Component
+const Message = ({ text, sender }) => (
+  <div className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+    <div className={`max-w-xs md:max-w-md p-2 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
+      {sender === 'bot' ? (
+        <ReactMarkdown>{text}</ReactMarkdown>
+      ) : (
+        text
+      )}
+    </div>
+  </div>
+);
+
+const ChatMessages = ({ messages }) => (
+  <div className="space-y-4">
+    {messages.map((message, index) => (
+      <Message key={index} {...message} />
+    ))}
+  </div>
+);
+
 const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading }) => (
   <div className="flex items-center bg-gray-700 rounded-lg">
     <input
@@ -45,7 +49,7 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
           handleSendMessage(inputMessage);
         }
       }}
-      placeholder="ChatGPT にメッセージを送信する"
+      placeholder="メッセージを送信する"
       className="flex-1 p-2 bg-transparent outline-none"
       disabled={isLoading}
     />
@@ -59,7 +63,6 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
   </div>
 );
 
-// Main ChatApp Component
 const ChatApp = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -82,12 +85,12 @@ const ChatApp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: `question=${encodeURIComponent(text)}`,
+        body: JSON.stringify({ question: text }),
       });
 
       if (!response.ok) {
@@ -96,18 +99,22 @@ const ChatApp = () => {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+
       let botResponse = '';
+      setMessages(prev => [...prev, { text: '', sender: 'bot' }]);
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
+        // eslint-disable-next-line no-loop-func
         lines.forEach(line => {
           if (line.startsWith('data: ')) {
             botResponse += line.slice(6);
           }
         });
+        // eslint-disable-next-line no-loop-func
         setMessages(prev => {
           const newMessages = [...prev];
           newMessages[newMessages.length - 1] = { text: botResponse, sender: 'bot' };
@@ -122,41 +129,29 @@ const ChatApp = () => {
     }
   };
 
-  const handleChatOptionClick = (text) => {
-    handleSendMessage(text);
-  };
-
   const handleReset = () => {
     setMessages([]);
     setInputMessage('');
   };
 
-  const chatOptions = [
-    { icon: <PlusCircle size={24} />, text: "プレゼンテーションの骨子を作成する", prompt: "プレゼンテーションの骨子を作成してください" },
-    { icon: <Database size={24} />, text: "製品を比較するキュレーション広告", prompt: "製品を比較するキュレーション広告を作成してください" },
-    { icon: <MessageCircle size={24} />, text: "キッチンにある材料で野菜多めのレシピ", prompt: "キッチンにある材料で野菜多めのレシピを提案してください" },
-    { icon: <Mail size={24} />, text: "日常のメールを素敵にするPythonスクリプト", prompt: "日常のメールを素敵にするPythonスクリプトを作成してください" },
-  ];
-
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
-      <Header onReset={handleReset} />
+      <header className="flex items-center justify-between p-4 bg-gray-800">
+        <div className="flex items-center cursor-pointer" onClick={handleReset}>
+          <MessageCircle className="mr-2" />
+          <span>ChatGPT</span>
+        </div>
+      </header>
       <main className="flex-1 overflow-auto p-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {chatOptions.map((option, index) => (
-                <ChatOption
-                  key={index}
-                  icon={option.icon}
-                  text={option.text}
-                  onClick={() => handleChatOptionClick(option.prompt)}
-                />
-              ))}
-            </div>
+            <ChatOptions onOptionClick={handleSendMessage} />
           </div>
         ) : (
-          <ChatMessages messages={messages} messagesEndRef={messagesEndRef} />
+          <>
+            <ChatMessages messages={messages} />
+            <div ref={messagesEndRef} />
+          </>
         )}
       </main>
       <footer className="p-4 bg-gray-800">
