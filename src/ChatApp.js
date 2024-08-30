@@ -6,68 +6,67 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-
 const ChatOption = ({ icon, text, onClick }) => (
-  <div onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
+  <div onClick={onClick} className="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
     {icon}
-    <span className="mt-2 text-xs text-gray-400">{text}</span>
+    <span className="mt-2 text-xs text-center text-gray-400">{text}</span>
   </div>
 );
 
 const ChatOptions = ({ onOptionClick }) => (
-  <div className="grid grid-cols-2 gap-4 mb-8">
-    <ChatOption icon={<Cpu size={24} />} text="スキルについて聞く" onClick={() => onOptionClick("宮木翔太のスキルを教えて")} />
-    <ChatOption icon={<GraduationCap size={24} />} text="学歴について聞く" onClick={() => onOptionClick("宮木翔太の学歴を教えて")} />
-    <ChatOption icon={<Briefcase size={24} />} text="職歴について聞く" onClick={() => onOptionClick("宮木翔太のこれまでの仕事を教えて")} />
-    <ChatOption icon={<Star size={24} />} text="強みについて聞く" onClick={() => onOptionClick("宮木翔太の強みを教えて")} />
+  <div className="grid grid-cols-2 gap-3 mb-6 mx-auto max-w-sm">
+    <ChatOption icon={<Cpu size={20} />} text="スキルについて聞く" onClick={() => onOptionClick("宮木翔太のスキルを教えて")} />
+    <ChatOption icon={<GraduationCap size={20} />} text="学歴について聞く" onClick={() => onOptionClick("宮木翔太の学歴を教えて")} />
+    <ChatOption icon={<Briefcase size={20} />} text="職歴について聞く" onClick={() => onOptionClick("宮木翔太のこれまでの仕事を教えて")} />
+    <ChatOption icon={<Star size={20} />} text="強みについて聞く" onClick={() => onOptionClick("宮木翔太の強みを教えて")} />
   </div>
 );
 
 const Message = ({ text, sender }) => (
-  <div className={`flex justify-center mb-4`}>
-    <div className={`max-w-2xl w-full p-4 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
+  <div className={`flex justify-center mb-3`}>
+    <div className={`max-w-full md:max-w-2xl w-full p-3 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
       {sender === 'bot' ? (
         <ReactMarkdown
-        className="prose prose-invert max-w-none"
-        rehypePlugins={[rehypeRaw]}
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code({node, inline, className, children, ...props}) {
-            const match = /language-(\w+)/.exec(className || '')
-            return !inline && match ? (
-              <SyntaxHighlighter
-                style={dracula}
-                language={match[1]}
-                PreTag="div"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            )
-          }
-        }}
-      >
+          className="prose prose-invert max-w-none text-sm md:text-base"
+          rehypePlugins={[rehypeRaw]}
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({node, inline, className, children, ...props}) {
+              const match = /language-(\w+)/.exec(className || '')
+              return !inline && match ? (
+                <SyntaxHighlighter
+                  style={dracula}
+                  language={match[1]}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              )
+            }
+          }}
+        >
           {text}
         </ReactMarkdown>
       ) : (
-        <p>{text}</p>
+        <p className="text-sm md:text-base">{text}</p>
       )}
     </div>
   </div>
 );
 
 const ChatMessages = ({ messages, isLoading }) => (
-  <div className="space-y-4">
+  <div className="space-y-3">
     {messages.map((message, index) => (
       <Message key={index} {...message} />
     ))}
     {isLoading && (
       <div className="flex justify-center">
-        <Loader className="animate-spin text-blue-500" size={24} />
+        <Loader className="animate-spin text-blue-500" size={20} />
       </div>
     )}
   </div>
@@ -85,15 +84,15 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
         }
       }}
       placeholder="メッセージを送信する"
-      className="flex-1 p-4 bg-transparent outline-none text-white"
+      className="flex-1 p-3 bg-transparent outline-none text-white text-sm"
       disabled={isLoading}
     />
     <button
       onClick={() => handleSendMessage(inputMessage)}
-      className={`p-4 ${isLoading ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`}
+      className={`p-3 ${isLoading ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`}
       disabled={isLoading}
     >
-      {isLoading ? <Loader className="animate-spin" size={20} /> : <Send size={20} />}
+      {isLoading ? <Loader className="animate-spin" size={18} /> : <Send size={18} />}
     </button>
   </div>
 );
@@ -146,7 +145,6 @@ const ChatApp = () => {
         if (done) break;
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
-        // eslint-disable-next-line no-loop-func
         lines.forEach(line => {
           if (line.startsWith('data: ')) {
             try {
@@ -158,7 +156,6 @@ const ChatApp = () => {
             }
           }
         });
-        // eslint-disable-next-line no-loop-func
         setMessages(prev => {
           const newMessages = [...prev];
           if (newMessages[newMessages.length - 1].sender === 'bot') {
@@ -190,13 +187,13 @@ const ChatApp = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
-      <header className="flex items-center justify-between p-4 bg-gray-800">
+      <header className="flex items-center justify-between p-3 bg-gray-800">
         <div className="flex items-center cursor-pointer" onClick={handleReset}>
-          <MessageCircle className="mr-2" />
-          <span>ChatMYK</span>
+          <MessageCircle className="mr-2" size={20} />
+          <span className="text-sm md:text-base">ChatMYK</span>
         </div>
       </header>
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1 overflow-auto p-3">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <ChatOptions onOptionClick={handleSendMessage} />
@@ -208,7 +205,7 @@ const ChatApp = () => {
           </>
         )}
       </main>
-      <footer className="p-4 bg-gray-800">
+      <footer className="p-3 bg-gray-800">
         <ChatInput
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
