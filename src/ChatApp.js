@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, PlusCircle, Database, Mail } from 'lucide-react';
+import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -16,10 +16,10 @@ const ChatOption = ({ icon, text, onClick }) => (
 
 const ChatOptions = ({ onOptionClick }) => (
   <div className="grid grid-cols-2 gap-4 mb-8">
-    <ChatOption icon={<PlusCircle size={24} />} text="プレゼンテーションの骨子を作成する" onClick={() => onOptionClick("プレゼンテーションの骨子を作成してください")} />
-    <ChatOption icon={<Database size={24} />} text="製品を比較するキュレーション広告" onClick={() => onOptionClick("製品を比較するキュレーション広告を作成してください")} />
-    <ChatOption icon={<MessageCircle size={24} />} text="キッチンにある材料で野菜多めのレシピ" onClick={() => onOptionClick("キッチンにある材料で野菜多めのレシピを提案してください")} />
-    <ChatOption icon={<Mail size={24} />} text="日常のメールを素敵にするPythonスクリプト" onClick={() => onOptionClick("日常のメールを素敵にするPythonスクリプトを作成してください")} />
+    <ChatOption icon={<Cpu size={24} />} text="スキルについて聞く" onClick={() => onOptionClick("宮木翔太のスキルを教えて")} />
+    <ChatOption icon={<GraduationCap size={24} />} text="学歴について聞く" onClick={() => onOptionClick("宮木翔太の学歴を教えて")} />
+    <ChatOption icon={<Briefcase size={24} />} text="職歴について聞く" onClick={() => onOptionClick("宮木翔太のこれまでの仕事を教えて")} />
+    <ChatOption icon={<Star size={24} />} text="強みについて聞く" onClick={() => onOptionClick("宮木翔太の強みを教えて")} />
   </div>
 );
 
@@ -79,7 +79,7 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
           handleSendMessage(inputMessage);
         }
       }}
-      placeholder="Chat にメッセージを送信する"
+      placeholder="メッセージを送信する"
       className="flex-1 p-4 bg-transparent outline-none text-white"
       disabled={isLoading}
     />
@@ -178,7 +178,7 @@ const ChatApp = () => {
       <header className="flex items-center justify-between p-4 bg-gray-800">
         <div className="flex items-center cursor-pointer" onClick={handleReset}>
           <MessageCircle className="mr-2" />
-          <span>Chat</span>
+          <span>ChatMYK</span>
         </div>
       </header>
       <main className="flex-1 overflow-auto p-4">
