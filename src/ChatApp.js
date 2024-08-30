@@ -110,17 +110,21 @@ const ChatApp = () => {
   const handleSendMessage = async (text) => {
     if (text.trim() === '') return;
 
-    setMessages(prev => [...prev, { text, sender: 'user' }]);
+    const newUserMessage = { text, sender: 'user' };
+    setMessages(prev => [...prev, newUserMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://llm-chat-application-backend.onrender.com/chat', {
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: text }),
+        body: JSON.stringify({ 
+          question: text,
+          history: messages.concat(newUserMessage) // 新しいメッセージを含む全履歴を送信
+        }),
       });
 
       if (!response.ok) {
@@ -146,7 +150,7 @@ const ChatApp = () => {
               botResponse += jsonData.text;
             } catch (e) {
               console.error('Error parsing JSON:', e);
-              botResponse += line.slice(5); // フォールバック: JSONでない場合は生テキストを追加
+              botResponse += line.slice(5);
             }
           }
         });
