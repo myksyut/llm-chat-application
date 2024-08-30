@@ -1,1 +1,2 @@
-# [ LLMチャット](https://llm-chat-application.vercel.app/)
+# LLMチャットアプリ
+Open https://llm-chat-application.vercel.app/ to view it in your browser.
