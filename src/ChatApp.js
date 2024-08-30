@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star } from 'lucide-react';
+import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star, Loader} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -60,11 +60,16 @@ const Message = ({ text, sender }) => (
   </div>
 );
 
-const ChatMessages = ({ messages }) => (
+const ChatMessages = ({ messages, isLoading }) => (
   <div className="space-y-4">
     {messages.map((message, index) => (
       <Message key={index} {...message} />
     ))}
+    {isLoading && (
+      <div className="flex justify-center">
+        <Loader className="animate-spin text-blue-500" size={24} />
+      </div>
+    )}
   </div>
 );
 
@@ -83,12 +88,12 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
       className="flex-1 p-4 bg-transparent outline-none text-white"
       disabled={isLoading}
     />
-    <button 
-      onClick={() => handleSendMessage(inputMessage)} 
-      className="p-4 text-gray-400 hover:text-white"
+    <button
+      onClick={() => handleSendMessage(inputMessage)}
+      className={`p-4 ${isLoading ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-white'}`}
       disabled={isLoading}
     >
-      <Send size={20} />
+      {isLoading ? <Loader className="animate-spin" size={20} /> : <Send size={20} />}
     </button>
   </div>
 );
@@ -108,7 +113,7 @@ const ChatApp = () => {
   }, [messages]);
 
   const handleSendMessage = async (text) => {
-    if (text.trim() === '') return;
+    if (text.trim() === '' || isLoading) return;
 
     const newUserMessage = { text, sender: 'user' };
     setMessages(prev => [...prev, newUserMessage]);
@@ -121,9 +126,9 @@ const ChatApp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           question: text,
-          history: messages.concat(newUserMessage) // 新しいメッセージを含む全履歴を送信
+          history: messages.concat(newUserMessage)
         }),
       });
 
@@ -135,7 +140,6 @@ const ChatApp = () => {
       const decoder = new TextDecoder();
 
       let botResponse = '';
-      setMessages(prev => [...prev, { text: '', sender: 'bot' }]);
 
       while (true) {
         const { value, done } = await reader.read();
@@ -157,10 +161,17 @@ const ChatApp = () => {
         // eslint-disable-next-line no-loop-func
         setMessages(prev => {
           const newMessages = [...prev];
-          newMessages[newMessages.length - 1] = {
-            text: botResponse,
-            sender: 'bot'
-          };
+          if (newMessages[newMessages.length - 1].sender === 'bot') {
+            newMessages[newMessages.length - 1] = {
+              text: botResponse,
+              sender: 'bot'
+            };
+          } else {
+            newMessages.push({
+              text: botResponse,
+              sender: 'bot'
+            });
+          }
           return newMessages;
         });
       }
@@ -192,7 +203,7 @@ const ChatApp = () => {
           </div>
         ) : (
           <>
-            <ChatMessages messages={messages} />
+            <ChatMessages messages={messages} isLoading={isLoading} />
             <div ref={messagesEndRef} />
           </>
         )}
