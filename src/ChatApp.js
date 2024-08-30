@@ -52,7 +52,7 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isLoading
           handleSendMessage(inputMessage);
         }
       }}
-      placeholder="ChatGPT にメッセージを送信する"
+      placeholder="Chat にメッセージを送信する"
       className="flex-1 p-4 bg-transparent outline-none text-white"
       disabled={isLoading}
     />
@@ -88,7 +88,7 @@ const ChatApp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch('https://llm-chat-application-backend.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const ChatApp = () => {
       <header className="flex items-center justify-between p-4 bg-gray-800">
         <div className="flex items-center cursor-pointer" onClick={handleReset}>
           <MessageCircle className="mr-2" />
-          <span>ChatGPT</span>
+          <span>Chat</span>
         </div>
       </header>
       <main className="flex-1 overflow-auto p-4">
