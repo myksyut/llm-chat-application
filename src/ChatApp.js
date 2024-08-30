@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, PlusCircle, Database, Mail } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 
 const ChatOption = ({ icon, text, onClick }) => (
@@ -20,10 +24,33 @@ const ChatOptions = ({ onOptionClick }) => (
 );
 
 const Message = ({ text, sender }) => (
-  <div className="flex justify-center mb-4">
+  <div className={`flex justify-center mb-4`}>
     <div className={`max-w-2xl w-full p-4 rounded-lg ${sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
       {sender === 'bot' ? (
-        <ReactMarkdown>
+        <ReactMarkdown
+        className="prose prose-invert max-w-none"
+        rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({node, inline, className, children, ...props}) {
+            const match = /language-(\w+)/.exec(className || '')
+            return !inline && match ? (
+              <SyntaxHighlighter
+                style={dracula}
+                language={match[1]}
+                PreTag="div"
+                {...props}
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            )
+          }
+        }}
+      >
           {text}
         </ReactMarkdown>
       ) : (
@@ -88,7 +115,7 @@ const ChatApp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://llm-chat-application-backend.onrender.com/chat', {
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,14 +141,20 @@ const ChatApp = () => {
         // eslint-disable-next-line no-loop-func
         lines.forEach(line => {
           if (line.startsWith('data: ')) {
-            botResponse += line.slice(6);
+            try {
+              const jsonData = JSON.parse(line.slice(5));
+              botResponse += jsonData.text;
+            } catch (e) {
+              console.error('Error parsing JSON:', e);
+              botResponse += line.slice(5); // フォールバック: JSONでない場合は生テキストを追加
+            }
           }
         });
         // eslint-disable-next-line no-loop-func
         setMessages(prev => {
           const newMessages = [...prev];
           newMessages[newMessages.length - 1] = {
-            text: botResponse.replace(/\n/g, '  \n'), // Markdown対応の改行
+            text: botResponse,
             sender: 'bot'
           };
           return newMessages;
