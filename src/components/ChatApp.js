@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star, Loader, StopCircle, RefreshCw } from 'lucide-react';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
@@ -31,6 +32,10 @@ const ChatApp = () => {
     const newUserMessage = { text, sender: 'user' };
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
     setInputMessage('');
+    await generateResponse(text, [...messages, newUserMessage]);
+  };
+
+  const generateResponse = async (text, messageHistory) => {
     setIsLoading(true);
     setProcessSteps(steps => steps.map(step => ({ ...step, completed: false })));
     setGeneratedQuery('');
@@ -47,7 +52,7 @@ const ChatApp = () => {
         },
         body: JSON.stringify({
           question: text,
-          history: [...messages, newUserMessage]
+          history: messageHistory
         }),
         signal: abortControllerRef.current.signal
       });
@@ -130,6 +135,18 @@ const ChatApp = () => {
     }
   };
 
+  const handleRegenerateAnswer = async () => {
+    if (messages.length < 2 || isLoading) return;
+    
+    const lastUserMessage = messages.filter(m => m.sender === 'user').pop();
+    if (lastUserMessage) {
+      // Remove the last bot message
+      setMessages(prevMessages => prevMessages.slice(0, -1));
+      // Generate a new response
+      await generateResponse(lastUserMessage.text, messages.slice(0, -1));
+    }
+  };
+
   const handleAbort = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -148,6 +165,7 @@ const ChatApp = () => {
     setSearchResults(null);
     setCurrentResponse('');
   };
+  const canRegenerateAnswer = messages.length >= 2 && !isLoading;
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -180,6 +198,8 @@ const ChatApp = () => {
             handleSendMessage={handleSendMessage}
             isLoading={isLoading}
             handleAbort={handleAbort}
+            handleRegenerateAnswer={handleRegenerateAnswer}
+            canRegenerateAnswer={canRegenerateAnswer}
           />
         </div>
       </footer>
