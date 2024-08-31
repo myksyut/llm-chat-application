@@ -26,7 +26,6 @@ const IntegratedProcessDisplay = ({ isLoading, processSteps, generatedQuery, sea
 
   return (
     <div className="p-4 bg-gray-800 rounded-lg shadow-lg mb-4">
-      <h3 className="text-lg font-semibold mb-4 text-center">実行プロセス</h3>
       <div className="space-y-4">
         {processSteps.map((step, index) => {
           const isCurrentStep = index === getCurrentStep() && isLoading;
