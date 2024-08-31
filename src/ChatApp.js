@@ -250,32 +250,32 @@ const ChatApp = () => {
           <span>ChatMYK</span>
         </div>
       </header>
-      <main className="flex-1 overflow-auto p-4 flex flex-col">
+      <main className="flex-1 overflow-auto p-4">
         {messages.length === 0 ? (
-          <div className="flex-grow flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center h-full">
             <ChatOptions onOptionClick={handleSendMessage} />
           </div>
         ) : (
           <>
-            <div className="flex-grow">
-              <ChatMessages messages={messages} isLoading={isLoading} />
-            </div>
-            {showProcessDisplay && (
-              <div className="mt-4">
-                <APIProcessDisplay isLoading={isLoading} processSteps={processSteps} />
-              </div>
-            )}
+            <ChatMessages messages={messages} isLoading={isLoading} />
             <div ref={messagesEndRef} />
           </>
         )}
       </main>
       <footer className="p-4 bg-gray-800">
-        <ChatInput
-          inputMessage={inputMessage}
-          setInputMessage={setInputMessage}
-          handleSendMessage={handleSendMessage}
-          isLoading={isLoading}
-        />
+        <div className="max-w-4xl mx-auto">
+          {showProcessDisplay && (
+            <div className="mb-4">
+              <APIProcessDisplay isLoading={isLoading} processSteps={processSteps} />
+            </div>
+          )}
+          <ChatInput
+            inputMessage={inputMessage}
+            setInputMessage={setInputMessage}
+            handleSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+        </div>
       </footer>
     </div>
   );
