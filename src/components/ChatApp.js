@@ -40,7 +40,7 @@ const ChatApp = () => {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch('https://llm-chat-application-backend.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,6 +67,7 @@ const ChatApp = () => {
         if (done) break;
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
+        // eslint-disable-next-line no-loop-func
         lines.forEach(line => {
           if (line.startsWith('data: ')) {
             try {
