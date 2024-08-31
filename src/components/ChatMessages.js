@@ -1,5 +1,4 @@
 import React from 'react';
-import { Loader } from 'lucide-react';
 import MarkdownRenderer from '../utils/MarkdownRenderer';
 
 const Message = ({ text, sender }) => (
@@ -15,11 +14,6 @@ const ChatMessages = ({ messages, isLoading }) => (
     {messages.map((message, index) => (
       <Message key={index} {...message} />
     ))}
-    {isLoading && (
-      <div className="flex justify-center">
-        <Loader className="animate-spin text-blue-500" size={24} />
-      </div>
-    )}
   </div>
 );
 
