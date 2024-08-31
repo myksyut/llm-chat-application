@@ -165,7 +165,7 @@ const ChatApp = () => {
     setProcessSteps(steps => steps.map(step => ({ ...step, completed: false })));
 
     try {
-      const response = await fetch('http://0.0.0.0:8000/chat', {
+      const response = await fetch('https://llm-chat-application-backend.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
