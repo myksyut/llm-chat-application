@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star, Loader} from 'lucide-react';
+import { MessageCircle, Send, Cpu, GraduationCap, Briefcase, Star, Loader, CheckCircle, Circle} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -7,23 +7,39 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const APIProcessDisplay = ({ isLoading, processSteps }) => {
+  const getCurrentStep = () => {
+    const currentStepIndex = processSteps.findIndex(step => !step.completed);
+    return currentStepIndex === -1 ? processSteps.length - 1 : currentStepIndex;
+  };
+
   return (
     <div className="p-4 bg-gray-800 rounded-lg">
       <h3 className="text-lg font-semibold mb-2">実行プロセス</h3>
-      {isLoading ? (
-        <div className="flex items-center">
-          <Loader className="animate-spin mr-2" size={20} />
-          <span>処理中...</span>
-        </div>
-      ) : (
-        <ul className="list-disc list-inside">
-          {processSteps.map((step, index) => (
-            <li key={index} className={step.completed ? "text-green-500" : "text-gray-400"}>
-              {step.name} {step.completed && "✓"}
+      <ul className="space-y-2">
+        {processSteps.map((step, index) => {
+          const isCurrentStep = index === getCurrentStep() && isLoading;
+          const isCompleted = step.completed;
+
+          return (
+            <li 
+              key={index} 
+              className={`flex items-center transition-all duration-300 ease-in-out ${
+                isCurrentStep ? 'text-blue-400' :
+                isCompleted ? 'text-green-500' : 'text-gray-400'
+              }`}
+            >
+              {isCurrentStep ? (
+                <Loader className="animate-spin mr-2" size={16} />
+              ) : isCompleted ? (
+                <CheckCircle className="mr-2" size={16} />
+              ) : (
+                <Circle className="mr-2" size={16} />
+              )}
+              <span>{step.name}</span>
             </li>
-          ))}
-        </ul>
-      )}
+          );
+        })}
+      </ul>
     </div>
   );
 };
